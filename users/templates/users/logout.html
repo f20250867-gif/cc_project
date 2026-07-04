@@ -1,0 +1,12 @@
+{% extends "teams/base.html"%}
+{% block content %}
+<h1>You have logged out</h1>
+
+    <div class="border-top pt-3">
+        <small class="text-muted">
+            Already have an account?
+            <a href="{% url 'login' %}">Log In again</a>
+        </small>
+    </div>
+
+{% endblock content %}

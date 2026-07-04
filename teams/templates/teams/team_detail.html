@@ -1,0 +1,26 @@
+{% extends "teams/base.html"%}
+{% block content %}
+{% load crispy_forms_tags %}
+<article class="media content-section">
+    <div class="media-body">
+        <div class="article-metadata">
+            <a class="mr-2" href="#">{{ object.title }}</a>
+            <div>
+                <form method="POST" action="{% url 'team-join-request' team.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-info">Request to Join</button>
+                </form>
+                <div>
+                    <button class="btn btn-outline-info">Team member</button>
+                    {% if request.user == team.member %}
+                    <a class="btn btn-outline-info" href="{% url 'team-pending-requests' team.id %}">View requests</a>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+        <h2 class="article-title">{{ object.title }}</h2>
+        <p class="article-content">{{ object.member }}</p>
+    </div>
+</article>
+{% endblock content %}

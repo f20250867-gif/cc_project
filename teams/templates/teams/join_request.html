@@ -1,0 +1,30 @@
+{% extends "teams/base.html"%}
+{% block content %}
+{% load crispy_forms_tags %}
+
+<h2>Join Requests for {{ team.title }}</h2>
+
+{% if join_requests %}
+    {% for join_request in join_requests %}
+        <div class="card">
+            <h3>requests</h3>
+            <p>{{ join_request.user.username }}</p>
+            <p>Sent: {{ join_request.created_at }}</p>
+
+            <!-- accept button -->
+            <form method="POST" action="#">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">Accept</button>
+            </form>
+
+            <!-- reject button -->
+            <form method="POST" action="#">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Reject</button>
+            </form>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No pending join requests</p>
+{% endif %}
+{% endblock content %}
