@@ -12,13 +12,13 @@
             <p>Sent: {{ join_request.created_at }}</p>
 
             <!-- accept button -->
-            <form method="POST" action="#">
+            <form method="POST" action="{% url 'accept-pending-requests' team.id %}">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-success">Accept</button>
             </form>
 
             <!-- reject button -->
-            <form method="POST" action="#">
+            <form method="POST" action="{% url 'reject-pending-requests' team.id %}">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger">Reject</button>
             </form>

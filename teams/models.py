@@ -41,7 +41,14 @@ class JoinRequest(models.Model):
         ('accepted', 'Accepted'),
         ('rejected', 'Rejected'),
     ]
+
+    INITIATED_BY_CHOICES = [
+        ('owner', 'Owner'),
+        ('user', 'User')
+    ]
+
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    initiated_by = models.CharField(max_length=10, choices=INITIATED_BY_CHOICES, default='user')
     created_at = models.DateTimeField(auto_now_add=True)    

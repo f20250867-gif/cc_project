@@ -11,7 +11,11 @@
                     <button type="submit" class="btn btn-outline-info">Request to Join</button>
                 </form>
                 <div>
-                    <button class="btn btn-outline-info">Team member</button>
+                    <form method="POST" action="{% url 'view-team-members' team.id %}">
+                        {% csrf_token %}
+                        <button class="btn btn-outline-info">Team member</button>
+                    </form>
+
                     {% if request.user == team.member %}
                     <a class="btn btn-outline-info" href="{% url 'team-pending-requests' team.id %}">View requests</a>
                     {% endif %}
