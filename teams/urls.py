@@ -8,7 +8,7 @@ urlpatterns = [
     path('team/<int:pk>/',TeamDetailView.as_view(), name='team-detail'),
     path('team/<int:pk>/join/',views.request_to_join_team, name='team-join-request'),
     path('team/<int:pk>/requests/',views.view_join_requests, name='team-pending-requests'),
-    path('team/<int:pk>/confirm/',views.accept_invite_request, name='accept-pending-requests'),
-    path('team/<int:pk>/reject/',views.reject_invite_request, name='reject-pending-requests'),
+    path('team/<int:team_pk>/confirm/<int:request_pk>/',views.accept_join_request, name='accept-pending-requests'),
+    path('team/<int:pk>/reject/<int:request_pk>/',views.reject_join_request, name='reject-pending-requests'),
     path('team/<int:pk>/members/',views.view_team_members, name='view-team-members'),
 ]

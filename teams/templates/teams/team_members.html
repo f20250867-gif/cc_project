@@ -1,0 +1,19 @@
+{% extends "teams/base.html"%}
+{% block content %}
+{% load crispy_forms_tags %}
+<article class="media content-section">
+    <div class="media-body">
+        <div class="article-metadata">
+            <a class="mr-2" href="#">{{ team.title }}</a>
+            {% for member in members %}
+            <div>
+                <p>{{ member.user.username }}</p>
+                <p>Role: {{ member.role }}</p>
+            </div>
+            {% empty %}
+            <p>No members yet</p>
+            {% endfor %}
+        </div>
+    </div>
+</article>
+{% endblock content %}

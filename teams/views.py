@@ -83,7 +83,7 @@ def accept_join_request(request, team_pk, request_pk):
     TeamMembership.objects.create(team=team,user=join_request.user,role='member')
 
     messages.success(request, f"{join_request.user.username} has been added to the team.")
-    return redirect('view-join-requests', pk=team_pk)
+    return redirect('team-detail', pk=team_pk)
 
 @login_required
 def reject_join_request(request, team_pk, request_pk):
@@ -185,8 +185,7 @@ def reject_invite_request(request, team_pk, request_pk):
 def view_team_members(request, pk):
     team = get_object_or_404(Team, pk=pk)
     members = TeamMembership.objects.filter(team=team)
-
-    is_owner = TeamMembership.objects.get(team=team,user=request.user,role='owner').exists()
+    is_owner = TeamMembership.objects.filter(team=team,user=request.user,role='owner').exists()
 
     if not is_owner:
         messages.warning(request, 'you are not allowed to perform this action')
