@@ -1,0 +1,21 @@
+{% extends "teams/base.html"%}
+{% block content %}
+{% load crispy_forms_tags %}
+
+<h2>Send request</h2>
+
+<form method="POST" action="{% url 'invite-to-join-team' team.pk %}">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="user_id">Select User to Invite</label>
+            <select name="user_id" id="user_id" class="form-control">
+                {% for user in remaining_users %}
+                    <option value="{{ user.id }}">{{ user.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Send Invite</button>
+    </form>
+{% endblock content %}  

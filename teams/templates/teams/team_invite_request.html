@@ -1,0 +1,30 @@
+{% extends "teams/base.html"%}
+{% block content %}
+{% load crispy_forms_tags %}
+
+<h2>Join Requests for {{ team.title }}</h2>
+
+{% if invite_requests %}
+    {% for invite_request in invite_requests %}
+        <div class="card">
+            <h3>invitations</h3>
+            <p>{{ invite_request.team }}</p>
+            <p>Sent: {{ invite_request.created_at }}</p>
+
+            <!-- accept button -->
+            <form method="POST" action="{% url 'accept-pending-invites' invite_request.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">Accept</button>
+            </form>
+
+            <!-- reject button -->
+            <form method="POST" action="{% url 'reject-pending-invites' invite_request.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Reject</button>
+            </form>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No pending invite requests</p>
+{% endif %}
+{% endblock content %}

@@ -1,0 +1,33 @@
+{% extends "teams/base.html"%}
+{% block content %}
+{% load crispy_forms_tags %}
+<article class="media content-section">
+    <div class="media-body">
+        <h2 class="article-title">{{ object.title }}</h2>
+        <p class="article-content">created by - {{ object.created_by}}</p>
+        <div class="article-metadata">
+            <p class="content-section">description: {{object.description}} </p>
+        </div>
+    </div>
+    <div class="article-metadata">
+        <a class="btn btn-outline-info" href="{% url 'project-update' object.team.id object.id %}">Update Project</a>
+        <a class="btn btn-outline-info" href="{% url 'project-delete' object.team.id object.id %}">Delete Project</a>
+    </div>
+</article>
+<!-- <article class="media content-section">
+<div class="list-group shadow-sm">
+    <h2 class="mb-3 ">Projects</h2>
+    {% for project in projects %}
+        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+            {{ project.title }}
+        </a>
+        
+    {% empty %}
+        <div class="alert alert-light text-muted mt-3" role="alert">
+            No projects available in this team yet.
+        </div>
+    {% endfor %}
+    
+</div>
+</article> -->
+{% endblock content %}

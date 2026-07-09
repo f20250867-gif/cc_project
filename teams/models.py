@@ -7,19 +7,20 @@ from django.urls import reverse
 class Team(models.Model):
     title = models.CharField(max_length=50)
     members = models.ManyToManyField(User, through='TeamMembership', related_name='teams', blank=True) 
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_teams', null=True)   
 
     def __str__(self):
-        return self.title
+        return f"{self.title}"
     
     def get_absolute_url(self):
         return reverse('team-home')
     
 
-class TeamMembership(models.Model):
+class TeamMembership(models.Model): 
     ROLE_CHOICES = [
         ('owner', 'Owner'),
         ('maintainer', 'Maintainer'),
-        ('member', 'Member'),
+        ('member', 'Member'), 
         ('viewer', 'Viewer'),
     ]
 
@@ -32,7 +33,7 @@ class TeamMembership(models.Model):
         unique_together = ('team', 'user')  
 
     def __str__(self):
-        return f"{self.user.username} - {self.role}"
+        return f"{self.user.username} - {self.role}({self.team.title})"
     
     
 class JoinRequest(models.Model):

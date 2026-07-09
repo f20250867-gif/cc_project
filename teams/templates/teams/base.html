@@ -57,7 +57,7 @@
             <div class="col-md-8">
                 {% if messages %}
                 {% for message in messages%}
-                <div class="alert alert-{{message.tags}}">  
+                <div class="alert alert-{{message.tags}}">
                     {{message}}
                 </div>
             </div>
@@ -74,7 +74,10 @@
                 <div class="list-group">
                     <a class="list-group-item list-group-item-light" href="{% url 'team-create' %}">Create
                         Team</a>
-                    <a class="list-group-item list-group-item-light" href="#">Join Team</a>
+                    
+                    <a class="list-group-item list-group-item-light"  href="{% url 'team-invite-requests' %}">Team invitations</a>
+                    
+
                     <a class="list-group-item list-group-item-light" href="#">Calendars</a>
                     <a class="list-group-item list-group-item-light" href="#">etc</a>
                 </div>

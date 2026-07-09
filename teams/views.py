@@ -1,12 +1,17 @@
+from multiprocessing import context
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
-from django.contrib.auth.models import User 
+from django.contrib.auth.models import User
+
+from projects.models import Project 
 from .models import Team, JoinRequest, TeamMembership
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+
 
 # Create your views here.
 
@@ -20,12 +25,19 @@ def home(request):
 class TeamDetailView(DetailView):
     model = Team
 
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        # Add in a QuerySet of all the projects
+        context["projects"] = Project.objects.filter(team=self.object)
+        return context
+
 class TeamCreateView(LoginRequiredMixin, CreateView):
     model = Team 
     fields = ['title']
 
     def form_valid(self,form):
-        form.instance.member = self.request.user
+        form.instance.owner = self.request.user
         input =  super().form_valid(form)
 
         TeamMembership.objects.create(
@@ -105,82 +117,77 @@ def reject_join_request(request, team_pk, request_pk):
     return redirect('view-join-requests', pk=team_pk)
 
 @login_required
+def invite_to_join_team_page(request, pk):
+    team = get_object_or_404(Team, pk=pk)
+    existing_members = Team.objects.all()
+    remaining_users = User.objects.exclude(id__in=existing_members)
+    return render(request, 'teams/send_invite_request.html',{
+        'team': team,
+        'remaining_users': remaining_users
+    })
+
+@login_required
 def invite_to_join_team(request, pk):
     team = get_object_or_404(Team, pk=pk)
 
     if request.method != 'POST':    
-        return redirect('team-detail', pk=pk)
+        return redirect('invite-to-join-team-page', pk=pk)
     user_id = request.POST.get('user_id')
 
     if not user_id:
         messages.warning(request, 'No user selected.')
-        return redirect('team-detail', pk=pk)
+        return redirect('invite-to-join-team-page', pk=pk)
 
     user = get_object_or_404(User, pk=user_id)
 
     if not TeamMembership.objects.filter(team=team, user=request.user, role='owner').exists():
         messages.warning(request, 'you are not allowed to perform this action')
-        return redirect('team-detail', pk=pk)
+        return redirect('invite-to-join-team-page', pk=pk)
     
     if JoinRequest.objects.filter(team=team, user=user, status='pending').exists():
         messages.info(request, "Your join request is already pending!")
-        return redirect('team-detail', pk=pk)
+        return redirect('invite-to-join-team-page', pk=pk)
     
     if TeamMembership.objects.filter(team=team, user=user).exists():
         messages.warning(request, "User is already a member of this team!")
-        return redirect('team-detail', pk=pk)
+        return redirect('invite-to-join-team-page', pk=pk)
 
-    
     JoinRequest.objects.create(team=team, user=user, initiated_by='owner') 
     messages.success(request, "Join invitation sent successfully!")
     return redirect('team-detail', pk=pk)
     
 
 @login_required
-def view_invite_request(request,pk):
-    team = get_object_or_404(Team,pk=pk)
-    invite_requests = JoinRequest.objects.filter(team=team, user = request.user ,status='pending', initiated_by='owner')
-
-    if request.user in team.members.all():
-        messages.warning(request, 'you are already a member of this team')
-        return redirect('team-detail', pk=pk)
+def view_invite_request(request):
+    invite_requests = JoinRequest.objects.filter(user = request.user ,status='pending', initiated_by='owner')
 
     return render(request, 'teams/team_invite_request.html',{
-        'team' : team,
         'invite_requests' : invite_requests
     })
 
 @login_required
-def accept_invite_request(request, team_pk, request_pk):
-    team = get_object_or_404(Team, pk=team_pk)
-    join_request = get_object_or_404(JoinRequest, pk=request_pk)
+def accept_invite_request(request, request_pk):
+    invite_request = get_object_or_404(JoinRequest, pk=request_pk)
+    team = invite_request.team
 
-    if join_request.user != request.user:
-        messages.warning(request, 'you are not allowed to perform this action')
-        return redirect('team-detail', pk=team_pk)
+    invite_request.status = 'accepted'
+    invite_request.save()
 
-    join_request.status = 'accepted'
-    join_request.save()
-
-    TeamMembership.objects.create(team=team,user=join_request.user,role='member')
+    TeamMembership.objects.create(team=team,user=invite_request.user,role='member')
 
     messages.success(request, f"You have successfully joined the team {team.title}.")
-    return redirect('view-join-requests', pk=team_pk)
+    return redirect('team-detail', pk=team.pk)
 
 @login_required
-def reject_invite_request(request, team_pk, request_pk):
-    team = get_object_or_404(Team, pk=team_pk)
-    join_request = get_object_or_404(JoinRequest, pk=request_pk)
+def reject_invite_request(request,request_pk):
+    invite_request = get_object_or_404(JoinRequest, pk=request_pk)
+    team = invite_request.team
 
-    if join_request.user != request.user:
-        messages.warning(request, 'you are not allowed to perform this action')
-        return redirect('team-detail', pk=team_pk)
-
-    join_request.status = 'rejected'
-    join_request.save()
+    invite_request.status = 'rejected'
+    invite_request.save()
 
     messages.success(request, f"You have successfully joined the team {team.title}.")
-    return redirect('view-join-requests', pk=team_pk)
+    return redirect('team-detail', pk=team.pk)
 
 def view_team_members(request, pk):
     team = get_object_or_404(Team, pk=pk)

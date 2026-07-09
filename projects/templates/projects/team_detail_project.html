@@ -1,0 +1,20 @@
+{% extends "teams/team_detail.html"%}
+{% block project_content %}
+{% load crispy_forms_tags %}
+    <div>
+        <form method="POST" action="{% url 'project-create' team.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-info">Create Project</button>
+        </form>
+        <!-- 
+                <form method="POST" action="{% url 'view-team-members' team.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-outline-info">Team member</button>
+                </form>
+                <form action="{% url 'invite-to-join-team-page' team.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-outline-info">Invite User</button>
+                </form>
+                <a class="btn btn-outline-info" href="{% url 'team-pending-requests' team.id %}">View requests</a> -->
+    </div>
+{% endblock project_content %}
