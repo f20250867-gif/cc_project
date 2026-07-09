@@ -132,6 +132,7 @@ def invite_to_join_team(request, pk):
 
     if request.method != 'POST':    
         return redirect('invite-to-join-team-page', pk=pk)
+    
     user_id = request.POST.get('user_id')
 
     if not user_id:
@@ -202,3 +203,67 @@ def view_team_members(request, pk):
         'team': team,
         'members': members
     })
+
+@login_required
+def assign_role_page(request, pk):
+    team = get_object_or_404(Team, pk=pk)
+    existing_members = TeamMembership.objects.filter(team=team).values_list('user_id', flat=True)
+    existing_users = User.objects.filter(id__in=existing_members).exclude(membership__role='owner').distinct()
+
+    for user in existing_users:
+        if TeamMembership.role == 'owner':
+            existing_users.remove(user)
+
+    selected_roles = [
+        (value, label)
+        for value, label in TeamMembership.ROLE_CHOICES
+        if value != 'owner'
+    ]
+
+    return render(request, 'teams/assign_role.html',{
+        'team': team,
+        'existing_users': existing_users,
+        'roles': selected_roles
+        
+    })
+
+@login_required
+def assign_role(request, pk):
+
+    team = get_object_or_404(Team, pk=pk)
+
+    if request.method != 'POST':    
+        return redirect('assign-role-page', pk=pk)
+
+    if not TeamMembership.objects.filter(team=team, user=request.user, role='owner').exists():
+        messages.warning(request, 'you are not allowed to perform this action')
+        return redirect('team-detail', pk=pk)
+    
+    user_id = request.POST.get('user_id')
+    get_role = request.POST.get('role')
+    get_user = get_object_or_404(User, pk=user_id)
+    team_membership = get_object_or_404(TeamMembership, team=team, user=get_user)
+
+    if not (user_id or get_role.id):
+        messages.warning(request, 'Please select an option')
+        return redirect('assign-role-page', pk=pk)
+
+    if team_membership.role == get_role:
+        messages.warning(request, 'user already has the same role')
+        return redirect('assign-role-page', pk=pk)
+    
+    valid_roles = []
+    for value, label in TeamMembership.ROLE_CHOICES:
+        valid_roles.append(value)
+    if get_role not in valid_roles or get_role == 'owner':
+        messages.warning(request, 'Invalid role selection')
+        return redirect('assign-role-page', pk=pk)
+    
+    team_membership.role = get_role
+    team_membership.save()
+    messages.success(request, f"{get_user.username} has been assigned as a {team_membership.role}.")
+    return redirect('view-team-members', pk=pk)
+
+
+
+

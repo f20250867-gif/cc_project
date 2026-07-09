@@ -52,4 +52,6 @@ urlpatterns = [
          name='reject-pending-invites'
          ),
     path('team/<int:pk>/members/',views.view_team_members, name='view-team-members'),
+    path('team/<int:pk>/assign_role/',views.assign_role_page, name='assign-role-page'),
+    path('team/<int:pk>/assign_role/assigned',views.assign_role, name='assign-role'),
 ]

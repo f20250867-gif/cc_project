@@ -1,0 +1,26 @@
+{% extends "teams/base.html"%}
+{% block content %}
+{% load crispy_forms_tags %}
+
+<h2>Assign Role</h2>
+
+<form method="POST" action="{% url 'assign-role' team.pk %}">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="user_id">Select User to Assign</label>
+                <select  name="user_id" id="user_id" class="form-control">
+                {% for user in existing_users %}
+                    <option value="{{ user.id }}">{{ user.username }}</option>
+                {% endfor %}
+        </select>
+        <select name="role" id="role-select" class="form-control">
+            {% for value, label in roles %}
+            <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+        </select>
+
+    </div>
+
+    <button type="submit" class="btn btn-primary">Assign</button>
+</form>
+{% endblock content %}

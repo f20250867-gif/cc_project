@@ -20,6 +20,10 @@
                     {% csrf_token %}
                     <button class="btn btn-outline-info">Invite User</button>
                 </form>
+                <form action="{% url 'assign-role-page' team.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-outline-info">Assign Role</button>
+                </form>
                 <a class="btn btn-outline-info" href="{% url 'team-pending-requests' team.id %}">View requests</a>
                 <form action="{% url 'project-create' team.id  %}">
                     {% csrf_token %}
