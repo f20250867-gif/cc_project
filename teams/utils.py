@@ -9,3 +9,5 @@ def is_team_member(user, team):
     return TeamMembership.objects.filter(team=team, user=user, role='member').exists()
 def is_team_viewer(user, team):
     return TeamMembership.objects.filter(team=team, user=user, role='viewer').exists()
+def is_present_in_team(user, team):
+    return TeamMembership.objects.filter(team=team, user=user).exists()

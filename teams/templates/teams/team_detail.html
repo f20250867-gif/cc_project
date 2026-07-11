@@ -3,15 +3,19 @@
 {% load crispy_forms_tags %}
 <article class="media content-section">
     <div class="media-body">
+        <div class="article-metadata d-flex justify-content-between">
+            <div>
         <h2 class="article-title">{{ object.title }}</h2>
         <p class="article-content">owner - {{ object.owner }}</p>
-        <div class="article-metadata">
-            <div>
+            </div>
+        
+
+        </div>
+        <div class="article-metadata form-container">
                 <form method="POST" action="{% url 'team-join-request' team.pk %}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-outline-info">Request to Join</button>
                 </form>
-
                 <form method="POST" action="{% url 'view-team-members' team.id %}">
                     {% csrf_token %}
                     <button class="btn btn-outline-info">Team member</button>
@@ -29,7 +33,6 @@
                     {% csrf_token %}
                     <button class="btn btn-outline-info">Create Project</button>
                 </form>
-            </div>
         </div>
 
     </div>

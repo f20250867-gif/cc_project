@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from projects.models import Project
+from django.urls import reverse_lazy
 from django.views.generic import (
 
     CreateView, 
@@ -12,7 +13,7 @@ from teams.models import Team, TeamMembership
 from django.contrib.auth.decorators import login_required
 from teams.utils import is_team_owner,is_team_maintainer
 from django.contrib import messages
-
+from tasks.models import Task
 
 
 
@@ -20,6 +21,7 @@ class ProjectCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
     model = Project
     fields = ['title', 'description']
+    pk_url_kwarg = 'project_pk'
 
     def get_team(self):
         team_id = self.kwargs.get('team_pk')
@@ -46,6 +48,7 @@ class ProjectCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 class ProjectUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Project
     fields = ['title', 'description']
+    pk_url_kwarg = 'project_pk'
 
     def get_team(self):
         team_id = self.kwargs.get('team_pk')
@@ -67,18 +70,28 @@ class ProjectUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             return True
         else:
             return False
+
         
 
 
 class ProjectDetailView(DetailView):
     model = Project
+    pk_url_kwarg = 'project_pk'
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        # Add in a QuerySet of all the projects
+        context["tasks"] = Task.objects.filter(project=self.object)
+        return context
     
 class ProjectDeleteView(LoginRequiredMixin, UserPassesTestMixin,  DeleteView):
     model = Project
+    pk_url_kwarg = 'project_pk'
 
     def get_success_url(self):
         return reverse_lazy('team-detail', kwargs={'pk': self.get_team().id})
-
+    
     def get_team(self):
         team_id = self.kwargs.get('team_pk')
         team =  get_object_or_404(Team, id=team_id)

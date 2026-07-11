@@ -3,6 +3,7 @@ from multiprocessing import context
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.contrib.auth.models import User
+from django.tasks import task
 
 from projects.models import Project 
 from .models import Team, JoinRequest, TeamMembership
@@ -11,6 +12,7 @@ from django.views.generic import CreateView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from .utils import is_team_owner, is_present_in_team
 
 
 # Create your views here.
@@ -70,7 +72,7 @@ def request_to_join_team(request, pk):
 def view_join_requests(request, pk):
     team = get_object_or_404(Team,pk=pk)
 
-    if not TeamMembership.objects.filter(team=team, user=request.user, role='owner').exists():
+    if not is_team_owner(request.user, team):
         messages.warning(request, 'you are not allowed to view this page')
 
     join_requests = JoinRequest.objects.filter(team=team, status='pending')
@@ -85,7 +87,7 @@ def accept_join_request(request, team_pk, request_pk):
     team = get_object_or_404(Team, pk=team_pk)
     join_request = get_object_or_404(JoinRequest, pk=request_pk)
 
-    if not TeamMembership.objects.filter(team=team, user=request.user, role='owner').exists():
+    if not is_team_owner(request.user, team):
         messages.warning(request, 'you are not allowed to perform this action')
         return redirect('team-detail', pk=team_pk)
 
@@ -102,7 +104,7 @@ def reject_join_request(request, team_pk, request_pk):
     team = get_object_or_404(Team, pk=team_pk)
     join_request = get_object_or_404(JoinRequest, pk=request_pk)
 
-    if not TeamMembership.objects.filter(team=team, user=request.user, role='owner').exists():
+    if not is_team_owner(request.user, team):
         messages.warning(request, 'you are not allowed to perform this action')
         return redirect('team-detail', pk=team_pk)
     
@@ -141,7 +143,7 @@ def invite_to_join_team(request, pk):
 
     user = get_object_or_404(User, pk=user_id)
 
-    if not TeamMembership.objects.filter(team=team, user=request.user, role='owner').exists():
+    if not is_team_owner(request.user, team):
         messages.warning(request, 'you are not allowed to perform this action')
         return redirect('invite-to-join-team-page', pk=pk)
     
@@ -195,7 +197,7 @@ def view_team_members(request, pk):
     members = TeamMembership.objects.filter(team=team)
     is_owner = TeamMembership.objects.filter(team=team,user=request.user,role='owner').exists()
 
-    if not is_owner:
+    if not is_present_in_team(request.user,team):
         messages.warning(request, 'you are not allowed to perform this action')
         return redirect('team-detail', pk=pk)
 
@@ -207,12 +209,8 @@ def view_team_members(request, pk):
 @login_required
 def assign_role_page(request, pk):
     team = get_object_or_404(Team, pk=pk)
-    existing_members = TeamMembership.objects.filter(team=team).values_list('user_id', flat=True)
-    existing_users = User.objects.filter(id__in=existing_members).exclude(membership__role='owner').distinct()
-
-    for user in existing_users:
-        if TeamMembership.role == 'owner':
-            existing_users.remove(user)
+    existing_members_id = team.members.all()
+    existing_users = team.members.filter(id__in=existing_members_id).exclude(membership__role='owner').distinct()
 
     selected_roles = [
         (value, label)
