@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'teams.apps.TeamsConfig',
     'projects.apps.ProjectsConfig',
+    'tasks.apps.TasksConfig',
     'rest_framework',
     'crispy_forms',
     'crispy_bootstrap4',

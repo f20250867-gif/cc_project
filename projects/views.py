@@ -1,5 +1,4 @@
 from django.shortcuts import get_object_or_404, render, redirect
-from django.urls import reverse_lazy
 from projects.models import Project
 from django.views.generic import (
 
