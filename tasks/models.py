@@ -40,7 +40,7 @@ class Comment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.author
+        return f"'{self.task}'"
     
     def get_absolute_url(self):
         return reverse('task-detail', kwargs={'project_pk': self.task.project.pk , 'team_pk':self.task.project.team.pk , 'task_pk':self.task.pk})

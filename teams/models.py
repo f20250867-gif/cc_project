@@ -53,3 +53,7 @@ class JoinRequest(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     initiated_by = models.CharField(max_length=10, choices=INITIATED_BY_CHOICES, default='user')
     created_at = models.DateTimeField(auto_now_add=True)    
+
+    def __str__(self):
+        return f"{self.user.username} {self.status} {self.team}"
+

@@ -17,15 +17,18 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from teams.models import Team,TeamMembership
 from django.contrib.auth.models import User
+from activity.mixins import ActivityCreateUpdateLogMixin, ActivityDeleteLogMixin
+from activity.models import Activity
+from django.forms import modelform_factory
 
 
 
-
-class TaskCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+class TaskCreateView(ActivityCreateUpdateLogMixin, LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
     model = Task
     pk_url_kwarg = 'task_pk'
     form_class = TaskForm
+    activity_action = 'created'
 
     def get_project(self):
         project_id = self.kwargs.get('project_pk')
@@ -48,8 +51,8 @@ class TaskCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return super().form_valid(form)
     
     def handle_no_permission(self): 
-        messages.warning(self.request, "You don't have permission to create a task!")
-        return redirect('project-detail', self.kwargs.get('projct_pk'), self.kwargs.get('team_pk'))
+        messages.error(self.request, "You don't have permission to create a task!")
+        return redirect('project-detail', self.kwargs.get('team_pk'), self.kwargs.get('project_pk'))
 
     def test_func(self):
         project = self.get_project()
@@ -59,23 +62,51 @@ class TaskCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             return False
         
 
-class TaskDetailView(DetailView):
+class TaskDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Task
     pk_url_kwarg = 'task_pk'
+
+    def get_team(self):
+        team_id = self.kwargs.get('team_pk')
+        team =  get_object_or_404(Team, id=team_id)
+        return team
+
+    def handle_no_permission(self): 
+        messages.error(self.request, "Page not found")
+        return redirect('team-home')
+
+    def test_func(self):
+        team = self.get_team()
+        if is_present_in_team(self.request.user, team):
+            return True
+        else:
+            return False
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
         # Add in a QuerySet of all the projects
         context["comments"] = Comment.objects.filter(task=self.object)
+        membership = TeamMembership.objects.filter(team=self.object.project.team, user=self.request.user).first()
+        context["user_role"] = membership.role if membership else None  #retrieving all team member's role for using in template
+        context["team_member"] = is_present_in_team(user=self.request.user, team=self.object.project.team) 
         return context
 
         
-class TaskUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class TaskUpdateView(ActivityCreateUpdateLogMixin, LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     model = Task
-    fields = ['title', 'description', 'priority', 'status']
+    #team member can only change status of task
+    def get_form_class(self):
+        if is_team_member(self.request.user, self.object.project.team):
+            fields = ['status']
+        else:
+            fields = ['title', 'description', 'priority', 'status']
+
+        return modelform_factory(Task, fields=fields)
+    
     pk_url_kwarg = 'task_pk'
+    activity_action = 'updated'
 
     def get_project(self):
         project_id = self.kwargs.get('project_pk') 
@@ -87,7 +118,7 @@ class TaskUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return super().form_valid(form)
     
     def handle_no_permission(self): 
-        messages.warning(self.request, "You don't have permission to create a task!")
+        messages.error(self.request, "You don't have permission to create a task!")
         return redirect('project-detail', self.kwargs.get('team_pk'), self.kwargs.get('project_pk'))
 
     def test_func(self):
@@ -97,12 +128,13 @@ class TaskUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         else:
             return False
 
-class ProjectDeleteView(LoginRequiredMixin, UserPassesTestMixin,  DeleteView):
-    model = Project
-    pk_url_kwarg = 'project_pk'
+class TaskDeleteView(ActivityDeleteLogMixin, LoginRequiredMixin, UserPassesTestMixin,  DeleteView):
+    model = Task
+    pk_url_kwarg = 'task_pk'
+    activity_action = 'deleted'
 
     def get_success_url(self):
-        return reverse_lazy('team-detail', kwargs={'pk': self.get_team().id})
+        return reverse_lazy('project-detail',args=[self.kwargs.get('team_pk'), self.kwargs.get('project_pk')])
     
     def get_project(self):
         project_id = self.kwargs.get('project_pk')
@@ -110,8 +142,8 @@ class ProjectDeleteView(LoginRequiredMixin, UserPassesTestMixin,  DeleteView):
         return project
     
     def handle_no_permission(self): 
-        messages.warning(self.request, "You don't have permission to create a task!")
-        return redirect('project-detail', self.kwargs.get('projct_pk'), self.kwargs.get('team_pk'))
+        messages.error(self.request, "You don't have permission to edit a task!")
+        return redirect('project-detail', self.kwargs.get('team_pk'), self.kwargs.get('project_pk'))
 
     def test_func(self):
         project = self.get_project()
@@ -128,6 +160,10 @@ def assign_task_page(request, team_pk, project_pk, task_pk):
     assigned_members_id = task.assigned_to.all()
     remaining_team_members = team.members.exclude(id__in=assigned_members_id)
 
+
+    if not is_team_owner(request.user, team) or is_team_maintainer(request.user, team):
+        messages.error(request, 'you are not allowed to view this page!')
+        return redirect('task-detail', team_pk=team_pk, project_pk=project_pk, task_pk=task_pk)
 
     return render(request, 'tasks/task_assign.html',{
         'project': project,
@@ -147,7 +183,7 @@ def assign_task(request, team_pk, project_pk, task_pk):
         return redirect('assign-task-page', team_pk=team_pk, project_pk=project_pk, task_pk=task_pk)
 
     if not is_team_owner(request.user, team) or is_team_maintainer(request.user, team):
-        messages.warning(request, 'you are not allowed to perform this action')
+        messages.error(request, 'you are not allowed to perform this action')
         return redirect('task-detail', team_pk=team_pk, project_pk=project_pk, task_pk=task_pk)
     
     user_id = request.POST.get('user_id')
@@ -164,6 +200,7 @@ def assign_task(request, team_pk, project_pk, task_pk):
     assigned_to = task.assigned_to 
     assigned_to = get_user
     assigned_to.save()
+    Activity.objects.create(target=task,action='was asigned',user=get_user)
 
     messages.success(request, f"{get_user.username} has been assigned as a task {task.title}")
     return redirect('task-detail',task.project.team.id, task.project.id, task.id)
@@ -182,7 +219,7 @@ def assign_task(request, team_pk, project_pk, task_pk):
 #     task_assigned = task.objects.filter(user=request.user)
 
 
-class CommentCreateView(LoginRequiredMixin,CreateView):
+class CommentCreateView(ActivityCreateUpdateLogMixin,UserPassesTestMixin,LoginRequiredMixin,CreateView):
 
     model = Comment
     pk_url_kwarg = 'comment_pk'
@@ -192,8 +229,17 @@ class CommentCreateView(LoginRequiredMixin,CreateView):
         task_id = self.kwargs.get('task_pk')
         task =  get_object_or_404(Task, id=task_id)
         return task
-
+    
     def form_valid(self,form):
         form.instance.author = self.request.user
         form.instance.task = self.get_task()
-        return super().form_valid(form)
+        response = super(ActivityCreateUpdateLogMixin, self).form_valid(form)
+        
+    
+        Activity.objects.create(
+            user=self.request.user,
+            action=f"commented on task",
+            target=self.object
+        )
+        response = super(ActivityCreateUpdateLogMixin, self).form_valid(form)
+        return response 

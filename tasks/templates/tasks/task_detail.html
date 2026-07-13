@@ -1,7 +1,7 @@
 {% extends "teams/base.html" %}
 {% block content %}
 {% load crispy_forms_tags %}
-
+{% if team_member %}
 <article class="media content-section">
     <div class="media-body">
         <div class="article-metadata d-flex justify-content-between">
@@ -32,9 +32,13 @@
     </div>
 
     <div class="article-metadata mt-3 ml-3">
+        {% if not user_role == 'viewer'%}
         <a class="btn btn-outline-info btn-sm" href="{% url 'task-update' object.project.team.id object.project.id object.id %}">Update Task</a>
-        <a class="btn btn-outline-danger btn-sm" href="{% url 'task-delete' object.project.team.id object.project.id object.id %}">Delete Task</a>
         <a class="btn btn-outline-success btn-sm" href="{% url 'task-assign' object.project.team.id object.project.id object.id %}">Assign Task</a>
+        {% endif %}
+        {% if user_role == 'owner' or user_role == 'maintainer' %}
+        <a class="btn btn-outline-danger btn-sm" href="{% url 'task-delete' object.project.team.id object.project.id object.id %}">Delete Task</a>
+        {% endif %}
     </div>
 </article>
 
@@ -65,5 +69,5 @@
         <button type="submit" class="btn btn-outline-primary btn-sm mt-2">Post Comment</button>
     </form>
 </div>
-
+{% endif %}
 {% endblock content %}

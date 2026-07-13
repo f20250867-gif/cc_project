@@ -10,18 +10,37 @@
         </div>
     </div>
     <div class="article-metadata">
+        {% if user_role == 'owner' or user_role == 'maintainer' %}
         <a class="btn btn-outline-info" href="{% url 'project-update' project.team.id project.id %}">Update Project</a>
         <a class="btn btn-outline-info" href="{% url 'project-delete' project.team.id project.id %}">Delete Project</a>
+        {% endif %}
+        {% if user_role == 'owner' or user_role == 'maintainer' or user_role == 'member' %}
         <a class="btn btn-outline-info" href="{% url 'task-create' project.team.id project.id  %}">Create Task</a>
+        {% endif %}
     </div>
 </article>
 <article class="media content-section">
 <div class="list-group shadow-sm">
     <h2 class="mb-3 ">Tasks</h2>
+    <form method="get", class="form-check">
+            
+        {{form.status_task_type}}
+        {{form.priority_task_type}}
+        <h2>filter search</h2>
+        <input type="text" name="task"/>
+        <!-- <input type="submit" value="search"/> -->
+        <button type="submit" class="btn btn-outline-primary">Filter</button>
+    </form>
     {% for task in tasks %}
-        <a href="{% url 'task-detail' project.team.id project.id task.id %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+    <div class="mt-8 list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+        <a href="{% url 'task-detail' project.team.id project.id task.id %}" >
             {{ task.title }}
         </a>
+        <div class="mb-3">
+            <span class="badge bg-secondary">{{ task.get_status_display }}</span>
+            <span class="badge bg-info text-dark">{{ task.get_priority_display }}</span>
+        </div>
+    </div>
         
     {% empty %}
         <div class="alert alert-light text-muted mt-3" role="alert">

@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import TeamCreateView, TeamDetailView
+from .views import TeamCreateView, TeamDetailView,TeamListView
 
 urlpatterns = [
     
@@ -32,7 +32,7 @@ urlpatterns = [
          name='accept-pending-requests'
          ),
     path(
-        '<int:pk>/reject_request/<int:request_pk>/',
+        '<int:team_pk>/reject_request/<int:request_pk>/',
          views.reject_join_request, 
          name='reject-pending-requests'
          ),

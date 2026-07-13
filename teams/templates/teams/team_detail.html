@@ -1,56 +1,78 @@
-{% extends "teams/base.html"%}
-{% block content %}
+{% extends "teams/base.html" %}
 {% load crispy_forms_tags %}
-<article class="media content-section">
-    <div class="media-body">
-        <div class="article-metadata d-flex justify-content-between">
-            <div>
-        <h2 class="article-title">{{ object.title }}</h2>
-        <p class="article-content">owner - {{ object.owner }}</p>
-            </div>
-        
+{% block content %}
 
-        </div>
-        <div class="article-metadata form-container">
-                <form method="POST" action="{% url 'team-join-request' team.pk %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-outline-info">Request to Join</button>
-                </form>
-                <form method="POST" action="{% url 'view-team-members' team.id %}">
-                    {% csrf_token %}
-                    <button class="btn btn-outline-info">Team member</button>
-                </form>
-                <form action="{% url 'invite-to-join-team-page' team.id %}">
-                    {% csrf_token %}
-                    <button class="btn btn-outline-info">Invite User</button>
-                </form>
-                <form action="{% url 'assign-role-page' team.id %}">
-                    {% csrf_token %}
-                    <button class="btn btn-outline-info">Assign Role</button>
-                </form>
-                <a class="btn btn-outline-info" href="{% url 'team-pending-requests' team.id %}">View requests</a>
-                <form action="{% url 'project-create' team.id  %}">
-                    {% csrf_token %}
-                    <button class="btn btn-outline-info">Create Project</button>
-                </form>
+<!-- ================= TEAM SECTION ================= -->
+<article class="media content-section mb-4">
+    <div class="media-body w-100">
+
+        <!-- Header -->
+        <div class="article-metadata mb-3 pb-2 border-bottom">
+            <h2 class="article-title mb-1">{{ object.title }}</h2>
+            <p class="text-muted mb-0">Owner: <strong>{{ object.owner }}</strong></p>
         </div>
 
+        <!-- Action Buttons -->
+        <div class="d-flex flex-wrap gap-2">
+            {% if team_member %}
+            <a href="{% url 'view-team-members' team.id %}" class="btn btn-outline-info btn-sm">Team Members</a>
+
+            {% if user_role == 'owner' or user_role == 'maintainer' %}
+            <a href="{% url 'invite-to-join-team-page' team.id %}" class="btn btn-outline-info btn-sm">Invite User</a>
+            <a href="{% url 'project-create' team.id %}" class="btn btn-outline-info btn-sm">Create Project</a>
+            {% endif %}
+
+            {% if user_role == 'owner' %}
+            <a href="{% url 'assign-role-page' team.id %}" class="btn btn-outline-info btn-sm">Assign Role</a>
+            <a href="{% url 'team-pending-requests' team.id %}" class="btn btn-outline-info btn-sm">View Requests</a>
+            {% endif %}
+
+            {% else %}
+            <form method="POST" action="{% url 'team-join-request' team.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-info btn-sm">Request to Join</button>
+            </form>
+            {% endif %}
+        </div>
     </div>
 </article>
+
+<!-- ================= PROJECTS SECTION ================= -->
+{% if team_member %}
 <article class="media content-section">
-<div class="list-group shadow-sm">
-    <h2 class="mb-3 ">Projects</h2>
-    {% for project in projects %}
-        <a href="{% url 'project-detail' team.id project.id %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-            {{ project.title }}
-        </a>
-        
-    {% empty %}
-        <div class="alert alert-light text-muted mt-3" role="alert">
-            No projects available in this team yet.
+    <div class="media-body w-100">
+
+        <!-- Title & Search Bar perfectly aligned in a row -->
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+            <h2 class="mb-0">Projects</h2>
+
+            <form method="get" class="d-flex">
+                <div class="input-group input-group-sm">
+                    <!-- Preserves the user's search text after page reload -->
+                    <input type="text" name="project" class="form-control" placeholder="Search projects..."
+                        value="{{ request.GET.project }}">
+                    <button class="btn btn-outline-secondary" type="submit">Search</button>
+                </div>
+            </form>
         </div>
-    {% endfor %}
-    
-</div>
+
+        <!-- Project List (w-100 ensures it stretches full width like the team box) -->
+        <div class="list-group w-100">
+            {% for project in projects %}
+            <a href="{% url 'project-detail' team.id project.id %}"
+                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                {{ project.title }}
+                <!-- Added a small visual arrow/icon for better UX -->
+                <span class="text-muted small">&rarr;</span>
+            </a>
+            {% empty %}
+            <div class="alert alert-light text-muted mb-0" role="alert">
+                No projects available in this team yet.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 </article>
+{% endif %}
+
 {% endblock content %}
