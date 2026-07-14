@@ -79,8 +79,8 @@
     3. Had two options for tracking user's activity, one through signals and other directly through views, but with signals i had problem with tracking which user updated the project/task, where as within views itself it was easy to write code for it(for updateview)
 
 7. Future imporvement
-    1. Creating view such that user is able to see first the teams in which that user is a member
+    1. creating custom mixin for role based access
     2. email based notification functionality
-    3. 
+    3. Creating view such that user is able to see first the teams in which that user is a member
 
 
