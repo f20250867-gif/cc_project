@@ -9,7 +9,7 @@
 
     organised it in this way so that each functionality stays in different app, which will keep code organised
 
-    Django provides a lot of functionality handy, and django is my first framework which i learnt.Especially the generic views gives a lots of fucntionality, so that i don't have to write much code, also the common register,login,logout functionality is very easily done here
+    Django provides a lot of functionality handy, Especially the generic views gives a lots of fucntionality, so that i don't have to write much code, also the common register,login,logout functionality is very easily done here
 
 
 2. Database Design
