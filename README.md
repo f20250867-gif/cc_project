@@ -1,54 +1,70 @@
-CC project
-This Django web application is about tracking projects and tasks for users in a team.
+# CC Project
+
+This Django web application tracks projects and tasks for users within a team.
 
 ## Prerequisites
-  1. Pyhton - 3.14.2
-  2. django - 6.0.2
-  3. PostgreSQL
-  4. pip
-  5. Git
 
-## Setup Instruction
-  1. Clone the Repository
-    -bash
-    git clone https://github.com/f20250867-gif/cc_project.git
-    cd cc_project
+1. Python 3.14.2
+2. Django 6.0.2
+3. SQLite (default, comes with Python)
+4. pip
+5. Git
 
-  2. Create Virtual Environment
-    for Windows
-    -bash
-      python -m venv venv
-      venv\scripts\activate
-    for Linux/macOS
-    -bash
-      python -m venv venv
-      venv\Scripts\activate
+## Setup Instructions
 
-   3. Install dependencies
-      -bash
-        pip install -r requirements.txt
+### 1. Clone the Repository
+```bash
+git clone https://github.com/f20250867-gif/cc_project.git
+cd cc_project
+```
 
-    ##4. Configure environment variables
+### 2. Create Virtual Environment
 
-   5. Apply database migrations
-      -bash
-        python manage.py makemigratons
-        python manage.py migrate
-    6. Create a superuser
-       -bash
-          python manage.py runserver
+**Windows**
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
 
-## Running locally
-  -bash
-    python manage.py runserver
+**Linux/macOS**
+```bash
+python -m venv venv
+source venv/bin/activate
+```
 
-  in browser visit :
-  http://127.0.0.1:8000/
+### 3. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
 
-  for admin page : 
-  http://127.0.0.1:8000/admin/
+### 4. Configure Environment Variables
 
-## Repository Structure 
+Copy `.env.example` to `.env` and fill in your own values:
+```bash
+cp .env.example .env
+```
+
+### 5. Apply Database Migrations
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+
+### 6. Create a Superuser
+```bash
+python manage.py createsuperuser
+```
+
+## Running Locally
+```bash
+python manage.py runserver
+```
+
+Visit in browser:
+- App: http://127.0.0.1:8000/
+- Admin: http://127.0.0.1:8000/admin/
+
+## Repository Structure
 
 cc_project/
 │
@@ -169,6 +185,14 @@ cc_project/
 - HTML/CSS
 - JavaScript
 
+## Features
+
+- Team creation with role-based access (Owner, Maintainer, Member, Viewer)
+- Project and task management within teams
+- Task assignment to multiple users
+- Comments on tasks
+- Activity log tracking key events
+- Join requests and invitations for team membership
 
 
   
