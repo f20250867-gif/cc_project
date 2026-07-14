@@ -18,39 +18,18 @@ git clone https://github.com/f20250867-gif/cc_project.git
 cd cc_project
 ```
 
-### 2. Create Virtual Environment
-
-**Windows**
-```bash
-python -m venv venv
-venv\Scripts\activate
-```
-
-**Linux/macOS**
-```bash
-python -m venv venv
-source venv/bin/activate
-```
-
-### 3. Install Dependencies
+### 2. Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configure Environment Variables
-
-Copy `.env.example` to `.env` and fill in your own values:
-```bash
-cp .env.example .env
-```
-
-### 5. Apply Database Migrations
+### 3. Apply Database Migrations
 ```bash
 python manage.py makemigrations
 python manage.py migrate
 ```
 
-### 6. Create a Superuser
+### 4. Create a Superuser
 ```bash
 python manage.py createsuperuser
 ```
