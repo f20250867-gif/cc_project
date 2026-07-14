@@ -1,6 +1,7 @@
 {% extends "teams/base.html"%}
 {% block content %}
 {% load crispy_forms_tags %}
+{% load socialaccount %}
 <div class="content-section">
     <form method="POST">
         {% csrf_token %}
@@ -18,6 +19,11 @@
         <small class="text-muted">Already have an Account? <a class="ml-2" href="#">Sign in</a>
 
         </small>
+        <a href="{% provider_login_url 'google' %}">
+            <button class="btn btn-google">
+                Sign up with Google
+            </button>
+        </a>
     </div>
 </div>
 {% endblock content %}
