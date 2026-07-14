@@ -65,7 +65,7 @@ Visit in browser:
 - Admin: http://127.0.0.1:8000/admin/
 
 ## Repository Structure
-
+```
 cc_project/
 │
 ├── cc_project/                     # main project config
@@ -128,6 +128,7 @@ cc_project/
 ├── requirements.txt
 ├── README.md
 └── ENGINEERING_DECISIONS.md
+```
 ## Technologies Used
 
 - Python
