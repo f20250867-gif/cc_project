@@ -25,6 +25,7 @@ from teams.views import TeamListView
 urlpatterns = [
     path('', TeamListView.as_view(), name='team-home'),
     path('admin/', admin.site.urls),
+    path('accounts/', include('allauth.urls')),
     path('team/', include('teams.urls')),
     path('team/<int:team_pk>/project/', include('projects.urls')), 
     path('team/<int:team_pk>/project/<int:project_pk>/task/', include('tasks.urls')), 

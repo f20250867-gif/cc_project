@@ -47,6 +47,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
 
 MIDDLEWARE = [
@@ -57,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'cc_project.urls'
@@ -78,6 +83,23 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'cc_project.wsgi.application'
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+
+    'AUTH_PARAMS': {'access_type': 'online'},
+    'METHOD': 'oauth2',
+    'VERIFIED_EMAIL': True,
+    }
+}
+
+AUTHENTICATION_BACKENDS =[
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
 
 
 # Database
@@ -136,3 +158,4 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger'
   
 }
+SOCIALACCOUNT_LOGIN_ON_GET=True
