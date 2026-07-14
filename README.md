@@ -98,10 +98,7 @@ cc_project/
 │   ├── mixins.py                   # ActivityLogMixin
 │   ├── models.py                   # Activity
 │   └── urls.py
-│
-├── templates/                      # project-level shared templates
-├── .env                            # not committed
-├── .env.example                    # committed template
+│                               
 ├── .gitignore
 ├── manage.py
 ├── requirements.txt
