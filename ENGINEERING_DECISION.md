@@ -38,6 +38,7 @@
     Role based access control was mainly done by UserPassesTest mixin for generic views, and for other views, functions were used inside it which checks role based access.
     UserPassestest mixin requires test_func which checked access based on role.
     I chose these roles as each role has different access, ranging owner from full access, to viewer only a few access, where as maintainer, and member has intermediate access, making it like a real world app, as giving full access in app dosen't make sense
+    Also rendering template according to role
 
 5. Problems faced
     1. Got same error many times about:
