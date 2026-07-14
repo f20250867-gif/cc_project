@@ -1,2 +1,179 @@
 CC project
-This Django web application is about 
+This Django web application is about tracking projects and tasks for users in a team.
+
+## Prerequisites
+  1. Pyhton - 3.14.2
+  2. django - 6.0.2
+  3. PostgreSQL
+  4. pip
+  5. Git
+
+## Setup Instruction
+  1. Clone the Repository
+    -bash
+    git clone https://github.com/f20250867-gif/cc_project.git
+    cd cc_project
+
+  2. Create Virtual Environment
+    for Windows
+    -bash
+      python -m venv venv
+      venv\scripts\activate
+    for Linux/macOS
+    -bash
+      python -m venv venv
+      venv\Scripts\activate
+
+   3. Install dependencies
+      -bash
+        pip install -r requirements.txt
+
+    ##4. Configure environment variables
+
+   5. Apply database migrations
+      -bash
+        python manage.py makemigratons
+        python manage.py migrate
+    6. Create a superuser
+       -bash
+          python manage.py runserver
+
+## Running locally
+  -bash
+    python manage.py runserver
+
+  in browser visit :
+  http://127.0.0.1:8000/
+
+  for admin page : 
+  http://127.0.0.1:8000/admin/
+
+## Repository Structure 
+
+cc_project/
+│
+├── cc_project/                     # main project config
+│   ├── __init__.py
+│   ├── settings.py
+│   ├── urls.py
+│   ├── wsgi.py
+│   └── asgi.py
+│
+├── users/                          # authentication & user management
+│   ├── migrations/
+│   ├── templates/
+│   │   └── users/
+│   │       ├── login.html
+│   │       ├── register.html
+│   │       └── logout.html
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── models.py
+│   ├── urls.py
+│   └── views.py
+│
+├── teams/                          # teams, membership, roles, invitations
+│   ├── migrations/
+│   ├── templates/
+│   │   └── teams/
+│   │       ├── base.html
+│   │       ├── team_form.html
+│   │       ├── team_detail.html
+│   │       ├── team_members.html
+│   │       ├── invite_member.html
+│   │       ├── assign_role.html
+│   │       └── join_requests.html
+│   ├── static/
+│   │   └── teams/
+│   │       └── main.css
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── mixins.py                   # UserAccessMixin etc.
+│   ├── models.py                   # Team, TeamMembership, JoinRequest
+│   ├── signals.py
+│   ├── urls.py
+│   ├── utils.py                    # is_team_owner, is_team_maintainer, etc.
+│   └── views.py
+│
+├── projects/                       # project management
+│   ├── migrations/
+│   ├── templates/
+│   │   └── projects/
+│   │       ├── project_form.html
+│   │       ├── project_detail.html
+│   │       └── project_confirm_delete.html
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py                   # Project
+│   ├── urls.py
+│   └── views.py
+│
+├── tasks/                          # task management, assignment
+│   ├── migrations/
+│   ├── templates/
+│   │   └── tasks/
+│   │       ├── task_form.html
+│   │       ├── task_detail.html
+│   │       ├── task_assign.html
+│   │       └── task_confirm_delete.html
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py                   # Task
+│   ├── urls.py
+│   └── views.py
+│
+├── comments/                       # commenting system
+│   ├── migrations/
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py                   # Comment
+│   ├── urls.py
+│   └── views.py
+│
+├── activity/                       # activity log (cross-cutting)
+│   ├── migrations/
+│   ├── templates/
+│   │   └── activity/
+│   │       └── activity_list.html
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── mixins.py                   # ActivityLogMixin
+│   ├── models.py                   # Activity
+│   └── urls.py
+│
+├── templates/                      # project-level shared templates (optional)
+│   └── 403.html
+│
+├── static/                         # project-level static (optional, collected)
+│
+├── .env                            # NOT committed (in .gitignore)
+├── .env.example                    # committed - template for required env vars
+├── .gitignore
+├── manage.py
+├── requirements.txt
+├── README.md
+└── ENGINEERING_DECISIONS.md
+
+## Technologies Used
+
+- Python
+- Django
+- SQLite/PostgreSQL
+- HTML/CSS
+- JavaScript
+
+
+
+  
+  
+      
+      
+    
+      
