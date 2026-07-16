@@ -1,4 +1,5 @@
 from urllib import request
+from django.contrib.messages.views import SuccessMessageMixin
 
 from django.shortcuts import get_object_or_404, render, redirect
 from projects.models import Project
@@ -9,7 +10,7 @@ from django.views.generic import (
     UpdateView, 
     DeleteView,
     DetailView,
-    ListView
+    ListView,
     )
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 import tasks
@@ -23,7 +24,7 @@ from .forms import FilterTaskType
 
 
 
-class ProjectCreateView(ActivityCreateUpdateLogMixin, LoginRequiredMixin, UserPassesTestMixin, CreateView):
+class ProjectCreateView(ActivityCreateUpdateLogMixin, LoginRequiredMixin, UserPassesTestMixin, SuccessMessageMixin ,CreateView):
 
     model = Project
     fields = ['title', 'description']
@@ -50,12 +51,22 @@ class ProjectCreateView(ActivityCreateUpdateLogMixin, LoginRequiredMixin, UserPa
             return True
         else:
             return False
+        
+    success_message = "'%(project_title)s'  project was created successfully"
+
+    def get_success_message(self, cleaned_data):
+        return self.success_message % dict(
+            cleaned_data,
+            project_title=self.object.title,
+        )
+
+
 
 class ProjectListView(ListView):
     model = Project 
 
 
-class ProjectUpdateView(ActivityCreateUpdateLogMixin, LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class ProjectUpdateView(ActivityCreateUpdateLogMixin, LoginRequiredMixin, UserPassesTestMixin,SuccessMessageMixin, UpdateView):
     model = Project
     fields = ['title', 'description']
     pk_url_kwarg = 'project_pk'
@@ -81,9 +92,14 @@ class ProjectUpdateView(ActivityCreateUpdateLogMixin, LoginRequiredMixin, UserPa
             return True
         else:
             return False
-
         
+    success_message = "'%(project_title)s'  project was updated successfully"
 
+    def get_success_message(self, cleaned_data):
+        return self.success_message % dict(
+            cleaned_data,
+            project_title=self.object.title,
+        )
 
 class ProjectDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Project
@@ -109,10 +125,13 @@ class ProjectDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         context = super().get_context_data(**kwargs)
         # Add in a QuerySet of all the projects
         tasks = Task.objects.filter(project=self.object)
-        # context["status_qs"] = Task.objects.filter(project=self.object)
+
+        # get value to be searched from user
         task_title = self.request.GET.get('task')
         status_types = self.request.GET.getlist('status_task_type')
         priority_types = self.request.GET.getlist('priority_task_type')
+
+        # putting retrieved data from user's input in tasks
         if self.request.method=="GET":
             if task_title!=None: 
                 tasks = tasks.filter(title__icontains=task_title, project=self.object)
@@ -122,20 +141,16 @@ class ProjectDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 
             if priority_types:
                 tasks = tasks.filter(priority__in=priority_types, project=self.object)
-        # context["priority_qs"] = Task.objects.filter(project=self.object)
-        # if len(priority_types):
-        #     tasks = Task.objects.filter(priority__in=priority_types,project=self.object)
-
+        # context for filter search
         context["form"] = FilterTaskType()
         context["tasks"] = tasks
         membership = TeamMembership.objects.filter(team=self.object.team, user=self.request.user).first()
+        # context for rendering role based html file
         context["user_role"] = membership.role if membership else None
         context["team_member"] = is_present_in_team(user=self.request.user, team=self.object.team)
 
         return context
 
-
-    
     # def search_task(self, request):
     #     tasks = Task.objects.all()
     #     if request.method=="GET":
@@ -146,7 +161,7 @@ class ProjectDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     #     return render(request, 'projects/project_detail.html', {'tasks':tasks})
 
    
-class ProjectDeleteView(ActivityDeleteLogMixin, LoginRequiredMixin, UserPassesTestMixin,  DeleteView):
+class ProjectDeleteView(ActivityDeleteLogMixin, LoginRequiredMixin, UserPassesTestMixin,SuccessMessageMixin, DeleteView):
     model = Project
     pk_url_kwarg = 'project_pk'
     activity_action = 'deleted'
@@ -169,5 +184,14 @@ class ProjectDeleteView(ActivityDeleteLogMixin, LoginRequiredMixin, UserPassesTe
             return True
         else:
             return False
+        
+    success_message = "'%(project_title)s'  project was deleted successfully"
+
+    def get_success_message(self, cleaned_data):
+        return self.success_message % dict(
+            cleaned_data,
+            project_title=self.object.title,
+        )
+
 
 

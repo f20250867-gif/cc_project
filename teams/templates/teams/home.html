@@ -4,7 +4,7 @@
 {% for team in allteams %}
 <article class="media content-section">
     <div class="media-body">
-        <h2><a class="article-title" href="{% url 'team-detail' team.id %}">{{ team.title }}</a></h2>
+        <h2><a class="article-title " href="{% url 'team-detail' team.id %}">{{ team.title }}</a></h2>
         <div class="article-metadata">
             <span class="mr-2">created by {{ team.owner}}</span>
         </div>

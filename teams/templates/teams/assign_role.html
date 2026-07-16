@@ -9,8 +9,8 @@
     <div class="form-group">
         <label for="user_id">Select User to Assign</label>
                 <select  name="user_id" id="user_id" class="form-control">
-                {% for user in existing_users %}
-                    <option value="{{ user.id }}">{{ user.username }}</option>
+                {% for user in existing_team_members %}
+                    <option value="{{ user.id }}">{{ user }}</option>
                 {% endfor %}
         </select>
         <select name="role" id="role-select" class="form-control">

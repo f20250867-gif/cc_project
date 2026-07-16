@@ -1,10 +1,8 @@
 from multiprocessing import context
-
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.tasks import task
-
 from projects.models import Project 
 from .models import Team, JoinRequest, TeamMembership
 from django.urls import reverse_lazy
@@ -147,18 +145,21 @@ def reject_join_request(request, team_pk, request_pk):
     messages.info(request, f"{join_request.user.username} 's join request has been rejected.")
     return redirect('team-pending-requests', pk=team_pk)
 
-#owner sending request page
+#owner and maintainer sending invitation to user page
 @login_required
 def invite_to_join_team_page(request, pk):
-
     team = get_object_or_404(Team, pk=pk)
 
-    if not is_team_owner(request.user, team) or is_team_maintainer(request.user, team):
-        messages.error(request, 'you are not allowed to perform this action')
+    if not (is_team_owner(request.user, team) or is_team_maintainer(request.user, team)):
+        messages.error(request, 'Page not found')
         return redirect('team-detail', pk=pk)
-    
-    existing_members = Team.objects.all()
-    remaining_users = User.objects.exclude(id__in=existing_members)
+    # retrieving user id's of all team members
+    user_ids = TeamMembership.objects.filter(team=team).values_list('user', flat=True)
+
+    # excluding team members
+    remaining_users = User.objects.exclude(id__in=user_ids)
+    #print(remaining_users)
+
     return render(request, 'teams/send_invite_request.html',{
         'team': team,
         'remaining_users': remaining_users
@@ -172,6 +173,7 @@ def invite_to_join_team(request, pk):
     if request.method != 'POST':    
         return redirect('invite-to-join-team-page', pk=pk)
     
+    # retrieving user's input to whom to send request
     user_id = request.POST.get('user_id')
 
     if not user_id:
@@ -180,14 +182,17 @@ def invite_to_join_team(request, pk):
 
     user = get_object_or_404(User, pk=user_id)
 
-    if not is_team_owner(request.user, team) or is_team_maintainer(request.user, team):
-        messages.error(request, 'you are not allowed to perform this action')
+    # check for access according to role
+    if not (is_team_owner(request.user, team) or is_team_maintainer(request.user, team)):
+        messages.error(request, 'Page not found')
         return redirect('team-detail', pk=pk)
     
+    # checking if already pending
     if JoinRequest.objects.filter(team=team, user=user, status='pending', initiated_by='owner').exists():
         messages.info(request, "join invitation is already pending")
         return redirect('invite-to-join-team-page', pk=pk)
     
+    # checking if user already in team
     if TeamMembership.objects.filter(team=team, user=user).exists():
         messages.warning(request, "User is already a member of this team!")
         return redirect('invite-to-join-team-page', pk=pk)
@@ -248,8 +253,12 @@ def view_team_members(request, pk):
 @login_required
 def assign_role_page(request, pk):
     team = get_object_or_404(Team, pk=pk)
-    existing_members_id = team.members.all()
-    existing_users = team.members.filter(id__in=existing_members_id).exclude(membership__role='owner').distinct()
+
+    #retrive team members id 
+    existing_team_members_id = TeamMembership.objects.filter(team=pk).exclude(role='owner').values_list('user', flat=True)
+    # retrieve 
+    existing_team_members = User.objects.filter(id__in=existing_team_members_id)
+    print(existing_team_members)
 
     if not is_team_owner(user=request.user,team=team):
         messages.error(request, 'Page not found')
@@ -263,7 +272,7 @@ def assign_role_page(request, pk):
 
     return render(request, 'teams/assign_role.html',{
         'team': team,
-        'existing_users': existing_users,
+        'existing_team_members': existing_team_members,
         'roles': selected_roles
         
     })
