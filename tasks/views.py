@@ -251,6 +251,7 @@ class CommentCreateView(ActivityCreateUpdateLogMixin,UserPassesTestMixin, LoginR
     model = Comment
     pk_url_kwarg = 'comment_pk'
     fields = ['content']
+    activity_action = 'commented on task'
 
     def get_project(self):
         project_id = self.kwargs.get('project_pk')
@@ -273,13 +274,9 @@ class CommentCreateView(ActivityCreateUpdateLogMixin,UserPassesTestMixin, LoginR
             return False
     
     def form_valid(self,form):
-        form.instance.author = self.request.user
         form.instance.task = self.get_task()
-        
-    
-        Activity.objects.create(
-            user=self.request.user,
-            action=f"commented on task",
-            target=self.object
-        )
-        return super().form_valid(form)
+        form.instance.author = self.request.user
+
+        response = super().form_valid(form)
+
+        return response

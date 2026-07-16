@@ -34,9 +34,9 @@
     <div class="article-metadata mt-3 ml-3">
         {% if user_role == 'owner' or user_role == 'maintainer' or user_role == 'member' and assigned_member %}
         <a class="btn btn-outline-info btn-sm" href="{% url 'task-update' object.project.team.id object.project.id object.id %}">Update Task</a>
-        <a class="btn btn-outline-success btn-sm" href="{% url 'task-assign' object.project.team.id object.project.id object.id %}">Assign Task</a>
         {% endif %}
         {% if user_role == 'owner' or user_role == 'maintainer' %}
+        <a class="btn btn-outline-success btn-sm" href="{% url 'task-assign' object.project.team.id object.project.id object.id %}">Assign Task</a>
         <a class="btn btn-outline-danger btn-sm" href="{% url 'task-delete' object.project.team.id object.project.id object.id %}">Delete Task</a>
         {% endif %}
     </div>
