@@ -8,7 +8,8 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   color: #444444;
-  margin-left: 50px;
+  text-align: start;
+  
 }
 
 ul {
@@ -140,4 +141,7 @@ a.article-title:hover {
 
 .list-group-item-light:hover {
   background-color: #eef1f3;
+}
+.text-start {
+  text-align: start;
 }
