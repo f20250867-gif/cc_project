@@ -42,10 +42,15 @@ class TaskCreateView(ActivityCreateUpdateLogMixin, LoginRequiredMixin, UserPasse
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         team = self.get_team()
-        # setting qeuryset of assigned_to field to only include team members
-        form.fields['assigned_to'].queryset = team.members.all()
-        return form
 
+        if is_team_owner(self.request.user, team) or is_team_maintainer(self.request.user, team):
+            # owner/maintainer can assign tasks - restrict dropdown to only team members
+            form.fields['assigned_to'].queryset = team.members.all()
+        else:
+            # regular members cannot assign tasks to anyone
+            del form.fields['assigned_to']
+
+        return form
     def form_valid(self,form):
         form.instance.created_by = self.request.user
         form.instance.project = self.get_project()
